@@ -16,12 +16,11 @@ function getPDOConnection($host, $dbname, $username, $password) {
 }
 
 function insertarData($pdo, $tablaName) {
-    //php script.php nombre_tabla
+   //php script.php nombre_tabla
     try {
-        $sql = "INSERT INTO $tablaName (columna) VALUES (?)";
+        $sql = "INSERT INTO $tablaName DEFAULT VALUES";
         $stmt = $pdo->prepare($sql);
-        $data = 'valor_unico';
-        $stmt->execute([$data]);
+        $stmt -> execute();
         echo "Dato insertado con éxito en la tabla '$tablaName'.\n";
     } catch (PDOException $e) {
         die("Error al insertar datos: " . $e->getMessage());
