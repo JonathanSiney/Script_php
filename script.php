@@ -27,8 +27,8 @@ function insertarData($pdo, $tablaName) {
         die("Error al insertar datos: " . $e->getMessage());
     }
 }
-
 function eliminarData($pdo, $tableName) {
+    //php script.php --dev rollback nombre_tabla
     $sql = "DELETE FROM $tableName";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
@@ -38,16 +38,13 @@ $options = [
     'rollback' => isset($argv[2]) && $argv[2] == 'rollback',
     'table' => isset($argv[3]) ? $argv[3] : null,
 ];
-
 if ($options['dev'] && $options['rollback'] && $options['table']) {
     $tableName = $options['table'];
     
     echo "Datos eliminados con éxito en la tabla $tableName\n";
     $pdo = getPDOConnection($host, $dbname, $username, $password);
-    
     eliminarData($pdo, $tableName);
 }else{
-    // php script.php 
     $tablaName = 'script_php'; 
     $pdo = getPDOConnection($host, $dbname, $username, $password);
     insertarData($pdo, $tablaName);
