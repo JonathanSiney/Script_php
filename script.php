@@ -15,19 +15,14 @@ function getPDOConnection($host, $dbname, $username, $password) {
     }
 }
 
-function insertarData($pdo, $tablaName) {
+function insertarData($pdo, $tableName, $data) {
     try {
-        $data = [
-            ['columna1' => 'valor1', 'columna2' => 'valor2']
-        ];
-        foreach ($data as $row) {
-            $data = implode(",", array_keys($row));
-            $placeholders = implode(",", array_fill(0, count($row), '?'));
-            $sql = "INSERT INTO $tablaName ($data) VALUES ($placeholders)";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute(array_values($row));
-        }
-        echo "Datos insertados correctamente.\n";
+        $columns = implode(",", array_keys($data));
+        $placeholders = implode(",", array_fill(0, count($data), '?'));
+        $sql = "INSERT INTO $tableName ($columns) VALUES ($placeholders)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array_values($data));
+        echo "Datos insertados correctamente en la tabla $tableName.\n";
     } catch (PDOException $e) {
         die("Error al insertar datos: " . $e->getMessage());
     }
@@ -48,18 +43,17 @@ $options = [
     'dev' => isset($argv[1]) && $argv[1] == '--dev',
     'rollback' => isset($argv[2]) && $argv[2] == 'rollback',
     'table' => isset($argv[3]) ? $argv[3] : null,
+    'data' => isset($argv[4]) && $argv[4] == '--data',
 ];
 
 if ($options['dev'] && $options['rollback'] && $options['table']) {
     $tableName = $options['table'];
     $pdo = getPDOConnection($host, $dbname, $username, $password);
-    
     eliminarData($pdo, $tableName);
-} else {
-   
+} elseif ($options['data']){
+    insertarData($pdo, $tablaName, $data);
     $tablaName = 'script_php'; 
     $pdo = getPDOConnection($host, $dbname, $username, $password);
-    insertarData($pdo, $tablaName);
+    echo "Los datos han sido insertados en la tabla $tablaName.\n";
 }
-
 ?>
