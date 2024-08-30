@@ -16,10 +16,11 @@ function getPDOConnection($host, $dbname, $username, $password) {
 }
 
 function insertarData($pdo, $tableName, $data) {
+    //php script.php --data="[columna1=valor1,columna2=valor2]"
+    $columns = implode(", ", array_keys($data));
+    $placeholders = implode(", ", array_fill(0, count($data), '?'));
+    $sql = "INSERT INTO $tableName ($columns) VALUES ($placeholders)";
     try {
-        $columns = implode(",", array_keys($data));
-        $placeholders = implode(",", array_fill(0, count($data), '?'));
-        $sql = "INSERT INTO $tableName ($columns) VALUES ($placeholders)";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($data));
         echo "Datos insertados correctamente en la tabla $tableName.\n";
@@ -29,6 +30,7 @@ function insertarData($pdo, $tableName, $data) {
 }
 
 function eliminarData($pdo, $tableName) {
+    //php script.php --dev rollback nombre_tabla
     try {
         $sql = "DELETE FROM $tableName";
         $stmt = $pdo->prepare($sql);
@@ -39,21 +41,26 @@ function eliminarData($pdo, $tableName) {
     }
 }
 
-$options = [
-    'dev' => isset($argv[1]) && $argv[1] == '--dev',
-    'rollback' => isset($argv[2]) && $argv[2] == 'rollback',
-    'table' => isset($argv[3]) ? $argv[3] : null,
-    'data' => isset($argv[4]) && $argv[4] == '--data',
-];
-
-if ($options['dev'] && $options['rollback'] && $options['table']) {
-    $tableName = $options['table'];
+if (isset($argv[1]) && $argv[1] == '--dev' && isset($argv[2]) && $argv[2] == 'rollback' && isset($argv[3])) {
+    $tableName = $argv[3];
     $pdo = getPDOConnection($host, $dbname, $username, $password);
     eliminarData($pdo, $tableName);
-} elseif ($options['data']){
-    insertarData($pdo, $tablaName, $data);
-    $tablaName = 'script_php'; 
-    $pdo = getPDOConnection($host, $dbname, $username, $password);
-    echo "Los datos han sido insertados en la tabla $tablaName.\n";
+}
+
+if (isset($argv)) {
+    $options = getopt("", ["data:"]);
+    
+    if (isset($options['data'])) {
+        $dataString = $options['data'];
+        parse_str(str_replace(['[', ']', ','], ['&', '', '&'], $dataString), $dataArray);
+        
+        if (!empty($dataArray)) {
+            $pdo = getPDOConnection($host, $dbname, $username, $password);
+            $tableName = 'script_php';
+            insertarData($pdo, $tableName, $dataArray);
+        } else {
+            die("El argumento --data no es un array asociativo válido.\n");
+        }
+    }
 }
 ?>
