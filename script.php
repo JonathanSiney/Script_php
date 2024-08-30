@@ -35,7 +35,7 @@ function eliminarData($pdo, $tableName) {
         $sql = "DELETE FROM $tableName";
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
-        echo "Datos eliminados con éxito en la tabla $tableName\n";
+         echo "Datos eliminados correctamente en la tabla $tableName\n";
     } catch (PDOException $e) {
         die("Error al eliminar datos: " . $e->getMessage());
     }
